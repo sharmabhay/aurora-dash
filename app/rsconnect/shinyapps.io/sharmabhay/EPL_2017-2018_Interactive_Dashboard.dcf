@@ -1,0 +1,12 @@
+name: EPL_2017-2018_Interactive_Dashboard
+title: EPL_2017-2018_Interactive_Dashboard
+username: sharmabhay
+account: sharmabhay
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 14576866
+bundleId: 10158606
+url: https://sharmabhay.shinyapps.io/EPL_2017-2018_Interactive_Dashboard/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
