@@ -1,4 +1,4 @@
-# setwd("C:/Users/abhay/OneDrive/Desktop/STAT/STAT_442/STAT_442_Final/app/")
+# setwd("H:/Documents - Copy/GitHub/aurora-dash/app/")
 
 library(shiny)
 library(htmltools)
@@ -19,7 +19,7 @@ library(tidyverse)
 library(geosphere)
 
 # Source pre-built data and visualizations
-source("STAT_442_Final_Visuals.R")
+source("visuals.R")
 
 teams <- unique(team_summary_stats$Team)
 stadiums <- unique(stadiums.dat$Stadium)
@@ -76,7 +76,7 @@ ui <- fluidPage(
               wins, draws, losses, goal difference, and average
               attendance per match.")
     ),
-    tags$a("Download Full Analysis (PDF)", href="STAT_442_Final.pdf",
+    tags$a("Download Full Analysis (PDF)", href="EPL_Teams_Full_Analysis.pdf",
            target="_blank", class="btn btn-primary")
   ),
   br(),
@@ -194,15 +194,15 @@ server <- function(input, output) {
 
   # Render image plots
   output$static1 <- renderImage({
-    list(src="www/stat442-option1-bubble-scatter-plot.png",
+    list(src="www/viz1-bubble-scatter-plot.png",
          contentType="image/png", alt="Bubble scatter plot")
   }, deleteFile=FALSE)
   output$static2 <- renderImage({
-    list(src="www/stat442-option2-map-plot.png", contentType="image/png",
+    list(src="www/viz2-map-plot.png", contentType="image/png",
          alt="Stadium map plot")
   }, deleteFile=FALSE)
   output$static3 <- renderImage({
-    list(src="www/stat442-option3-violin-box-plot.png", contentType="image/png",
+    list(src="www/viz3-violin-box-plot.png", contentType="image/png",
          alt="Hybrid violin-box plot")
   }, deleteFile=FALSE)
 
