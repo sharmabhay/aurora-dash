@@ -19,5 +19,6 @@ An interactive Shiny dashboard for the 2017–2018 English Premier League (EPL) 
 git clone https://github.com/sharmabhay/aurora-dash.git
 cd aurora-dash
 # Launch the app
+cd app
 Rscript -e "shiny::runApp('.')"
 ```
