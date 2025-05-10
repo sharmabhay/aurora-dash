@@ -191,6 +191,12 @@ tagList(
         margin: 0 !important;
         line-height: 50px !important;
       }
+      .navbar-nav > .dropdown:hover > .dropdown-menu {
+        display: block !important;
+      }
+      .navbar-nav > .dropdown > .dropdown-menu:hover {
+        display: block !important;
+      }
       .navbar-nav > li > a {
         padding: 0 15px !important;
         height: 50px !important;
@@ -220,7 +226,9 @@ tagList(
         border: 1px solid #ddd;
         padding: 15px;
       }
-      .shiny-output-error { color: red; }
+      .shiny-output-error {
+        color: red;
+      }
     "))
   )
 )
