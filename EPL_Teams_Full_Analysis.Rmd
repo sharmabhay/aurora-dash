@@ -218,20 +218,28 @@ stadiums.dat <- data.frame(
 
 # Compute distances from Manchester City (most wins in 2017-2018) to all others
 hub_name <- "Manchester City"
-hub_row <- filter(stadiums.dat, Team == hub_name)
+hub <- filter(stadiums.dat, Team == hub_name)
 others <- filter(stadiums.dat, Team != hub_name)
 dist_km <- distHaversine(
-  c(hub_row$Long, hub_row$Lat),
+  c(hub$Long, hub$Lat),
   cbind(others$Long, others$Lat)
 ) / 1000
+# Lookup data frame with 0 for hub and calculated distances for others
+dist_lookup <- rbind(
+  data.frame(Team=hub$Team, Distance="0 km (Hub)", stringsAsFactors=FALSE),
+  data.frame(Team=others$Team, Distance=paste0(round(dist_km, 1), " km"),
+             stringsAsFactors=FALSE)
+)
+# Merge to stadiums data frame
+stadiums.dat <- merge(stadiums.dat, dist_lookup, by="Team", all.x=TRUE,
+                      sort=FALSE)
 # Create data frame for segments
 segments.dat <- data.frame(
-  x=hub_row$Long,
-  y=hub_row$Lat,
+  x=hub$Long,
+  y=hub$Lat,
   xend=others$Long,
   yend=others$Lat,
-  dist=round(dist_km, 1),
-  lab=paste0(dist_km %>% round(1), " km")
+  dist_lab=paste0(round(dist_km, 1), " km")
 )
 # Calculate midpoint coordinates for labeling
 segments.dat <- segments.dat %>%
@@ -248,13 +256,16 @@ create_map_plot <- function(data1, data2) {
   geom_polygon(data=uk.dat, aes(x=long, y=lat, group=group), fill="lightblue",
                color="black") +
   geom_segment(data=data1, aes(x=x, y=y, xend=xend, yend=yend,
-                               text=paste0("Distance: ", lab)),
+                               text=paste0("Distance: ", dist_lab)),
                color="gray70", linewidth=0.8) +
-  geom_text_repel(data=data1, aes(x=mid_x, y=mid_y, label=lab), size=3,
+  geom_text_repel(data=data1, aes(x=mid_x, y=mid_y, label=dist_lab), size=3,
                   fontface="italic", color="black", max.overlaps=20, force=10) +
   geom_point(data=data2, aes(x=Long, y=Lat, fill=Team,
-                             text=paste0("Stadium: ", Stadium)), size=3,
-             shape=21, alpha=0.8) +
+                             text=paste0(
+                               "Stadium: ", Stadium, "\n",
+                               "Distance from Hub: ", Distance)
+                             ),
+             size=3, shape=21, alpha=0.8) +
   scale_fill_manual(values=team_pal, name="Team") +
   coord_fixed(1.3) +
   labs(title="EPL Stadium Locations in the UK (2017-2018)",
