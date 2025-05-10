@@ -63,7 +63,7 @@ ui <- navbarPage(
                       ),
                       tags$li(
                         tags$img(
-                          src="icons/box-plot.png", width="24px", height="24px",
+                          src="icons/box-plot.png", width="32px", height="24px",
                           style="margin-right:8px; vertical-align:middle;"
                         ),
                         "Violin‑box plot of matchday attendance distributions
@@ -71,7 +71,7 @@ ui <- navbarPage(
                       ),
                       tags$li(
                         tags$img(
-                          src="icons/performance.png", width="24px",
+                          src="icons/performance.png", width="32px",
                           height="24px",
                           style="margin-right:8px; vertical-align:middle;"
                         ),
@@ -135,7 +135,7 @@ ui <- navbarPage(
   ),
   # Conclusion section
   footer=wellPanel(
-    h3(class="conclusion-header", "Key Analytical Findings"),
+    tags$h3(class="conclusion-header", "Key Analytical Findings"),
     tags$ul(
       tags$li(strong("Dominant Overall Performance: "),
               "Manchester City led the league with ", strong("32 wins"),
@@ -143,9 +143,10 @@ ui <- navbarPage(
               ", outscoring their xG by ", strong("27.5 goals"),
               " (106 actual vs 78.5 expected)."),
       tags$li(strong("Attendance Edge: "),
-              "The top 3 clubs by average attendance - Manchester United (56,225),
-      ", "Tottenham (52,191), and Arsenal (48,852) - averaged ",
-              strong("37% higher crowds"), " than the league average (38,274)."),
+              "The top 3 clubs by average attendance - Manchester United
+              (56,225), ", "Tottenham (52,191), and Arsenal (48,852) -
+              averaged ", strong("37% higher crowds"), " than the league
+              average (38,274)."),
       tags$li(strong("Defensive Performance: "),
               "Burnley conceded only 39 goals against an xGA of 51.1, ",
               strong("24% fewer goals"),
@@ -157,7 +158,7 @@ ui <- navbarPage(
               " and each conceded at least 55 goals.")
     ),
     tags$p(tags$em("Data Source: FBref.com / worldfootballR"),
-      style="margin-top:20px; color: #7f8c8d;")
+           style="margin-top:20px; color: #7f8c8d;")
   )
 ) %>%
 # Formatting
