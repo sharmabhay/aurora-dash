@@ -317,4 +317,3 @@ create_gt_table <- function(data) {
     )
 }
 create_gt_table(team_summary_stats)
-
