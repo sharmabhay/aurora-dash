@@ -2,7 +2,7 @@
 
 An interactive Shiny dashboard for the 2017–2018 English Premier League (EPL) season, built with R. Explore expected vs actual goals, stadium travel distances, attendance patterns, and detailed team statistics - all in one place.
 
-🔗 **Live Demo:** https://sharmabhay.shinyapps.io/EPL_2017-2018_Interactive_Dashboard/
+🔗 **Live Demo:** https://sharmabhay.shinyapps.io/EPL_2017-2018_Interactive_Dashboard
 
 
 ## Features
@@ -11,6 +11,13 @@ An interactive Shiny dashboard for the 2017–2018 English Premier League (EPL) 
 - **Geographic Map** showing straight-line Travel Distances from a selected hub club to all other Stadiums.
 - **Violin-Box Plot** of matchday Attendance broken down by Match Outcome.
 - **Formatted Table** with rich conditional formatting and performance metrics on Team Statistics.
+
+
+## Requirements
+
+Ensure all the necessary R libraries/packages (listed in `app/app.R`) are installed by following this blog:
+
+https://www.dataquest.io/blog/install-package-r
 
 
 ## Installation
