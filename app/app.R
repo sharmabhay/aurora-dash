@@ -4,7 +4,7 @@ library(shiny)
 library(htmltools)
 library(shinythemes)
 library(sportyR)
-library(worldfootballR)
+# library(worldfootballR)
 library(gt)
 library(maps)
 library(ggrepel)
@@ -13,6 +13,7 @@ library(plotly)
 library(scales)
 library(viridis)
 library(RColorBrewer)
+library(readr)
 library(dplyr)
 library(tidyr)
 library(stringr)
@@ -140,24 +141,25 @@ ui <- navbarPage(
       tags$li(strong("Dominant Overall Performance: "),
               "Manchester City led the league with ", strong("32 wins"),
               " (84% win rate) and a goal difference of ", strong("+79"),
-              ", outscoring their xG by ", strong("27.5 goals"),
-              " (106 actual vs 78.5 expected)."),
+              ", outscoring their xG by ", strong("14.6 goals"),
+              " (106 actual vs 91.4 expected)."),
       tags$li(strong("Attendance Edge: "),
               "The top 3 clubs by average attendance - Manchester United
-              (56,225), ", "Tottenham (52,191), and Arsenal (48,852) -
-              averaged ", strong("37% higher crowds"), " than the league
-              average (38,274)."),
+              (74,976), ",
+              "Tottenham Hotspur (67,496), and Arsenal (59,323) - averaged ",
+              strong("at least 50% higher crowds"),
+              " than the league average (38,274)."),
       tags$li(strong("Defensive Performance: "),
-              "Burnley conceded only 39 goals against an xGA of 51.1, ",
-              strong("24% fewer goals"),
+              "Burnley conceded only 39 goals against an xGA of 52.2, ",
+              strong("25% fewer goals"),
               " than expected - one of the best defensive records in
               the league."),
       tags$li(strong("Relegation Struggles: "),
-              "The 3 relegated sides (West Brom, Stoke, Swansea) scored ",
-              strong("10.5% below their xG"),
-              " and each conceded at least 55 goals.")
+              "The 3 relegated sides (West Bromwich Albion, Stoke City,
+              Swansea City) each had an actual goal difference of at least
+              25 goals, along with Huddersfield Town.")
     ),
-    tags$p(tags$em("Data Source: FBref.com / worldfootballR"),
+    tags$p(tags$em("Data Source: FBref.com / Understat"),
            style="margin-top:20px; color: #7f8c8d;")
   )
 ) %>%

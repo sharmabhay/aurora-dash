@@ -1,7 +1,7 @@
 # setwd("H:/Documents - Copy/GitHub/aurora-dash/app/")
 
 library(sportyR)
-library(worldfootballR)
+# library(worldfootballR)
 library(gt)
 library(maps)
 library(ggrepel)
@@ -9,80 +9,112 @@ library(ggplot2)
 library(scales)
 library(viridis)
 library(RColorBrewer)
+library(readr)
 library(dplyr)
 library(tidyr)
 library(stringr)
 library(tidyverse)
 library(geosphere)
 
+
 ## Initialize dataset and perform data cleaning as well as modifications
-# Retrieve English Premier League match results for 2017-2018
+
+## 2026-04-05: Blocked due to anti-scraping measures from FBref.com and package
+## is officially archived as of late 2025.
+# # Retrieve English Premier League match results for 2017-2018
+# season <- "2017-2018"
+# epl_results <- fb_match_results(country="ENG", gender="M", season_end_year=2018,
+#                                 tier="1st")
+
+# 1. Manually set Season
 season <- "2017-2018"
-epl_results <- fb_match_results(country="ENG", gender="M", season_end_year=2018,
-                                tier="1st")
-# Add match results column
-epl_results <- epl_results %>%
+
+# 2. Load Understat Team Summary (with advanced metrics)
+understat_data <- read_csv("data/understat_2017_2018.csv") %>%
+  select(team, matches, xG, xGA, wins, draws, loses, points) %>%
+  rename(
+    Team=team,
+    Matches_Played=matches,
+    xG_For=xG,
+    xG_Against=xGA,
+    Wins=wins,
+    Draws=draws,
+    Losses=loses,
+    Points=points
+  )
+understat_data <- understat_data %>%
+  mutate(Team=case_when(
+    Team == "Brighton" ~ "Brighton & Hove Albion",
+    Team == "Huddersfield" ~ "Huddersfield Town",
+    Team == "Tottenham" ~ "Tottenham Hotspur",
+    Team == "Leicester" ~ "Leicester City",
+    Team == "West Ham" ~ "West Ham United",
+    Team == "Swansea" ~ "Swansea City",
+    Team == "Stoke" ~ "Stoke City",
+    TRUE ~ Team
+  ))
+
+# 3. Load FBref Match-level data (Attendance and Results)
+epl_results <- read_csv("data/epl_results_2017_2018.csv",
+                        col_types=cols(.default="c")) %>%
+  filter(!is.na(Home), Home != "Home") %>%
+  separate(Score, into=c("HomeGoals", "AwayGoals"), sep="[–-]",
+           convert=TRUE) %>%
   mutate(
+    Attendance=as.numeric(gsub(",", "", Attendance)),
     Match_Result=case_when(
       HomeGoals > AwayGoals ~ "Home Win",
       HomeGoals < AwayGoals ~ "Away Win",
       TRUE ~ "Draw"
     )
   )
+epl_results <- epl_results %>%
+  mutate(
+    Home=case_when(
+      Home == "Manchester Utd" ~ "Manchester United",
+      Home == "Brighton" ~ "Brighton & Hove Albion",
+      Home == "Huddersfield" ~ "Huddersfield Town",
+      Home == "West Brom" ~ "West Bromwich Albion",
+      TRUE ~ Home
+    ),
+    Away=case_when(
+      Away == "Manchester Utd" ~ "Manchester United",
+      Away == "Brighton" ~ "Brighton & Hove Albion",
+      Away == "Huddersfield" ~ "Huddersfield Town",
+      Away == "West Brom" ~ "West Bromwich Albion",
+      TRUE ~ Away
+    )
+  )
 
-# Create data frame for home matches
+# 4.1. Create data frame for home matches
 home_stats <- epl_results %>%
-  transmute(
-    team=Home,
-    goals_for=HomeGoals,
-    goals_against=AwayGoals,
-    xG_for=Home_xG,
-    xG_against=Away_xG,
-    result=case_when(
-      HomeGoals > AwayGoals ~ "Win",
-      HomeGoals < AwayGoals ~ "Loss",
-      TRUE ~ "Draw"
-    ),
-    attendance=Attendance
+  group_by(Team=Home) %>%
+  summarise(
+    Goals_For_H=sum(HomeGoals, na.rm=TRUE), 
+    Goals_Against_H=sum(AwayGoals, na.rm=TRUE), 
+    Average_Attendance=mean(Attendance, na.rm=TRUE)
   )
-# Create data frame for away matches
+# 4.2. Create data frame for away matches
 away_stats <- epl_results %>%
-  transmute(
-    team=Away,
-    goals_for=AwayGoals,
-    goals_against=HomeGoals,
-    xG_for=Away_xG,
-    xG_against=Home_xG,
-    result=case_when(
-      AwayGoals > HomeGoals ~ "Win",
-      AwayGoals < HomeGoals ~ "Loss",
-      TRUE ~ "Draw"
-    ),
-    attendance=Attendance
+  group_by(Team=Away) %>%
+  summarise(
+    Goals_For_A=sum(AwayGoals, na.rm=TRUE), 
+    Goals_Against_A=sum(HomeGoals, na.rm=TRUE)
   )
-# Combine home and away statistics then summarize per team
-team_summary_stats <- bind_rows(home_stats, away_stats) %>%
-  mutate(Team=team) %>%
-  group_by(Team) %>%
-  summarize(
-    Matches_Played=n(),
-    Wins=sum(result == "Win"),
-    Draws=sum(result == "Draw"),
-    Losses=sum(result == "Loss"),
-    Goals_For=sum(goals_for, na.rm=TRUE),
-    Goals_Against=sum(goals_against, na.rm=TRUE),
-    Goal_Difference=Goals_For-Goals_Against,
-    xG_For=sum(xG_for, na.rm=TRUE),
-    xG_Against=sum(xG_against, na.rm=TRUE),
-    xG_Difference=xG_For-xG_Against,
-    Average_Attendance=mean(attendance)
+
+# 5. Combine home and away statistics then summarize per team
+team_summary_stats <- home_stats %>%
+  left_join(away_stats, by="Team") %>%
+  mutate(
+    Goals_For=Goals_For_H+Goals_For_A,
+    Goals_Against=Goals_Against_H+Goals_Against_A,
+    Goal_Difference=Goals_For-Goals_Against
   ) %>%
-  select(Team, Matches_Played, Wins, Draws, Losses, Goals_For, Goals_Against,
-         Goal_Difference, xG_For, xG_Against, xG_Difference,
-         Average_Attendance) %>%
-  arrange(desc(Wins))
-# Add season column for reference
-team_summary_stats$Season <- season
+  left_join(understat_data, by="Team") %>%
+  mutate(
+    xG_Difference=xG_For-xG_Against,
+    Season=season
+  )
 
 
 ## Visualization 1: Multi-Continuous Variables (Bubble Scatter Plot)
@@ -139,11 +171,12 @@ create_bubble_scatter_plot(team_summary_stats)
 ## Visualization 2: Geographical Visualization (Map of Team Stadiums)
 # Create manual data frame of stadium names and coordinates per team
 stadiums.dat <- data.frame(
-  Team=c("Arsenal", "Bournemouth", "Brighton", "Burnley", "Chelsea",
-         "Crystal Palace", "Everton", "Huddersfield", "Leicester", "Liverpool",
-         "Manchester City", "Manchester United", "Newcastle United",
-         "Southampton", "Stoke", "Swansea", "Tottenham", "Watford",
-         "West Bromwich Albion", "West Ham"),
+  Team=c("Arsenal", "Bournemouth", "Brighton & Hove Albion", "Burnley",
+         "Chelsea", "Crystal Palace", "Everton", "Huddersfield Town",
+         "Leicester City", "Liverpool", "Manchester City", "Manchester United",
+         "Newcastle United", "Southampton", "Stoke City", "Swansea City",
+         "Tottenham Hotspur", "Watford", "West Bromwich Albion",
+         "West Ham United"),
   Stadium=c("Emirates Stadium", "Vitality Stadium", "American Express Stadium",
             "Turf Moor", "Stamford Bridge", "Selhurst Park", "Goodison Park",
             "John Smith's Stadium", "King Power Stadium", "Anfield",
@@ -247,7 +280,7 @@ create_violin_box_plot(epl_results)
 create_gt_table <- function(data) {
   data %>%
     mutate(Team=if_else(Goal_Difference > 0, paste0(Team, " *"), Team)) %>%
-    arrange(desc(Wins)) %>%
+    arrange(desc(Points)) %>%
     gt() %>%
     tab_header(
       title=md("**EPL Team Performance Statistics (2017-2018)**"),
@@ -284,7 +317,8 @@ create_gt_table <- function(data) {
       table.font.names="Roboto"
     ) %>%
     cols_hide(
-      columns=c(Season, Initials)
+      columns=c(Season, Initials, Goals_For_H, Goals_Against_H, Goals_For_A,
+                Goals_Against_A)
     ) %>%
     cols_label(
       Team=html("Squad"),
@@ -300,6 +334,9 @@ create_gt_table <- function(data) {
       xG_Difference=html("xGD"),
       Average_Attendance=html("Attendance")
     ) %>%
+    cols_move_to_start(columns=c(Team, Matches_Played, Wins, Draws, Losses,
+                                 Points)) %>%
+    cols_move_to_end(columns=Average_Attendance) %>%
     data_color(
       columns=Wins,
       colors=col_numeric(
