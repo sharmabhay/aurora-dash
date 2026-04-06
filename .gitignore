@@ -1,2 +1,7 @@
-# R Connection Details
+# R history and temporary files (if they ever exist)
+.Rhistory
+.RData
+.Ruserdata
+
+# R connection details
 app/rsconnect/
